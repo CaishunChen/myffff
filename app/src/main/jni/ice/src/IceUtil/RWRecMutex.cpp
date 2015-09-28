@@ -9,7 +9,7 @@
 
 #include <IceUtil/RWRecMutex.h>
 #include <IceUtil/Exception.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 
 IceUtil::DeadlockException::DeadlockException(const char* file, int line) :
     Exception(file, line)

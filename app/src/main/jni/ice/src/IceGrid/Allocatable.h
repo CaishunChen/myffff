@@ -13,7 +13,7 @@
 #include <IceUtil/Handle.h>
 #include <IceUtil/Mutex.h>
 #include <IceUtil/Shared.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 
 #include <IceGrid/WaitQueue.h>
 #include <IceGrid/Session.h>

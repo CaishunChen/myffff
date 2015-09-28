@@ -14,7 +14,7 @@
 
 #include <IceUtil/Mutex.h>
 #include <IceUtil/Monitor.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/Thread.h>
 #include <Ice/Identity.h>
 #include <list>

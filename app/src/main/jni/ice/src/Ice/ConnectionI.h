@@ -9,10 +9,10 @@
 
 #ifndef ICE_CONNECTION_I_H
 #define ICE_CONNECTION_I_H
-
+#include <memory>
 #include <IceUtil/Mutex.h>
 #include <IceUtil/Monitor.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/Thread.h> // For ThreadPerConnection.
 #include <Ice/Connection.h>
 #include <Ice/ConnectionIF.h>

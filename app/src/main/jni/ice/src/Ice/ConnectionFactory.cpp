@@ -6,7 +6,7 @@
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
-
+#include <memory>
 #include <Ice/ConnectionFactory.h>
 #include <Ice/ConnectionI.h>
 #include <Ice/Instance.h>

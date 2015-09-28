@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <Ice/LoggerI.h>
 #include <IceUtil/StaticMutex.h>
 

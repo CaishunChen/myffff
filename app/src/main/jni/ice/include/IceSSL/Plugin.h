@@ -10,7 +10,7 @@
 #ifndef ICE_SSL_PLUGIN_H
 #define ICE_SSL_PLUGIN_H
 
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <Ice/Plugin.h>
 #include <Ice/ConnectionF.h>
 

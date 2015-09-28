@@ -11,7 +11,7 @@
 #define ICE_UTIL_COND_H
 
 #include <IceUtil/Config.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/ThreadException.h>
 
 #ifdef _WIN32

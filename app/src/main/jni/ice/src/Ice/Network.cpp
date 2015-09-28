@@ -16,7 +16,7 @@
 #if defined(_WIN32)
 #  include <winsock2.h>
 #elif defined(__linux) || defined(__APPLE__) || defined(__FreeBSD__)
-#  include <ifaddrs.h>
+#	include "ifaddrs.h"
 #else
 #  include <sys/ioctl.h>
 #  include <net/if.h>

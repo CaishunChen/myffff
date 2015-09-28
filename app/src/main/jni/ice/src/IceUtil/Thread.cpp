@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceUtil/Thread.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/ThreadException.h>
 
 using namespace std;

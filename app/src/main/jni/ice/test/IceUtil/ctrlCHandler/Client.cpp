@@ -10,7 +10,7 @@
 #include <TestCommon.h>
 #include <IceUtil/CtrlCHandler.h>
 #include <IceUtil/Thread.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 
 using namespace IceUtil;
 using namespace std;

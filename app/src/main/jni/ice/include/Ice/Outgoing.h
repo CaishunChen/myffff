@@ -9,7 +9,7 @@
 
 #ifndef ICE_OUTGOING_H
 #define ICE_OUTGOING_H
-
+#include <memory>
 #include <IceUtil/Mutex.h>
 #include <IceUtil/Monitor.h>
 #include <Ice/ConnectionIF.h>

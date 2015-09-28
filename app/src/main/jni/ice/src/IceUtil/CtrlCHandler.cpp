@@ -192,7 +192,8 @@ CtrlCHandler::CtrlCHandler(CtrlCHandlerCallback callback)
 
 CtrlCHandler::~CtrlCHandler()
 {
-    int rc = pthread_cancel(_tid);
+    //int rc = pthread_cancel(_tid);
+	int rc =pthread_kill(_tid, SIGTERM);
     assert(rc == 0);
 #if defined(__APPLE__)
     //

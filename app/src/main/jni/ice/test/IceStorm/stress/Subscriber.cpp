@@ -12,7 +12,7 @@
 #include <IceStorm/IceStorm.h>
 #include <IceUtil/Options.h>
 #include <IceUtil/Thread.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/Random.h>
 #include <Event.h>
 

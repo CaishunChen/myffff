@@ -9,7 +9,7 @@
 
 #include <IceUtil/UUID.h>
 #include <IceUtil/Random.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/Thread.h>
 #include <IceUtil/StaticMutex.h>
 #include <TestCommon.h>

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceUtil/Thread.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <Ice/ProxyFactory.h>
 #include <Ice/Instance.h>
 #include <Ice/Proxy.h>

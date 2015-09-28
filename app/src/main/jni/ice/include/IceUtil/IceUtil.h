@@ -44,7 +44,7 @@
 #include <IceUtil/StringUtil.h>
 #include <IceUtil/Thread.h>
 #include <IceUtil/ThreadException.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <IceUtil/UUID.h>
 #include <IceUtil/Unicode.h>
 

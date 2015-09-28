@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceUtil/DisableWarnings.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <iomanip>
 
 #ifdef _WIN32

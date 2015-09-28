@@ -14,7 +14,7 @@
 #include <Ice/CommunicatorF.h>
 #include <Ice/ObjectAdapterF.h>
 #include <Ice/PropertiesF.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 
 namespace IceStorm
 {

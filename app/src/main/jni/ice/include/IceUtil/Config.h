@@ -9,6 +9,7 @@
 
 #ifndef ICE_UTIL_CONFIG_H
 #define ICE_UTIL_CONFIG_H
+//#define __linux 
 
 //
 // Endianness
@@ -16,7 +17,7 @@
 // Most CPUs support only one endianness, with the notable exceptions
 // of Itanium (IA64) and MIPS.
 //
-#if defined(__i386)     || defined(_M_IX86) || defined(__x86_64)  || \
+#if defined(__i386)     || defined(_M_IX86) || defined(__ANDROID__) || defined(__x86_64)  || \
     defined(_M_X64)     || defined(_M_IA64) || defined(__alpha__) || \
     defined(__MIPSEL__)
 #   define ICE_LITTLE_ENDIAN
@@ -43,7 +44,7 @@
       defined(_ARCH_COM) && defined(__64BIT__)                     || \
       defined(__alpha__)                                           || \
       defined(_WIN64)
-#   define ICE_64
+#   define ICE_32
 #else
 #   define ICE_32
 #endif

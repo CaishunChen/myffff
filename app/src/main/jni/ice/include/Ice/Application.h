@@ -10,6 +10,7 @@
 #ifndef ICE_APPLICATION_H
 #define ICE_APPLICATION_H
 
+#include <memory>
 #include <Ice/Ice.h>
 
 namespace Ice

@@ -39,7 +39,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-GLOBAL_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/include/Ice $(LOCAL_PATH)/include/IceUtil $(LOCAL_PATH)/src
+GLOBAL_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/include/Ice $(LOCAL_PATH)/include/IceUtil $(LOCAL_PATH)/src $(LOCAL_PATH)/../bzip2
 
 
 ICE_DIR			:= src/Ice
@@ -52,7 +52,6 @@ ICE_UTIL_SRCS   :=\
 				$(ICE_UTIL_DIR)/Cond.cpp\
 				$(ICE_UTIL_DIR)/ConvertUTF.cpp\
 				$(ICE_UTIL_DIR)/CountDownLatch.cpp\
-				$(ICE_UTIL_DIR)/CtrlCHandler.cpp\
 				$(ICE_UTIL_DIR)/Exception.cpp\
 				$(ICE_UTIL_DIR)/InputUtil.cpp\
 				$(ICE_UTIL_DIR)/MD5.cpp\
@@ -84,13 +83,11 @@ ICE_SRCS		:= \
 				$(ICE_DIR)/Connector.cpp\
 				$(ICE_DIR)/DefaultsAndOverrides.cpp\
 				$(ICE_DIR)/Direct.cpp\
-				$(ICE_DIR)/DLLMain.cpp\
 				$(ICE_DIR)/DynamicLibrary.cpp\
 				$(ICE_DIR)/EndpointFactory.cpp\
 				$(ICE_DIR)/EndpointFactoryManager.cpp\
 				$(ICE_DIR)/EndpointI.cpp\
 				$(ICE_DIR)/EventHandler.cpp\
-				$(ICE_DIR)/EventLoggerI.cpp\
 				$(ICE_DIR)/Exception.cpp\
 				$(ICE_DIR)/FactoryTable.cpp\
 				$(ICE_DIR)/FactoryTableDef.cpp\
@@ -154,8 +151,10 @@ GLOBAL_CFLAGS  := -DICE_API_EXPORTS -D_REENTRANT -DNDEBUG  -ICE_UTIL_API_EXPORTS
 		-fdata-sections -ffunction-sections -isystem $(SYSROOT)/usr/include/
 		
 		
+LOCAL_SHARED_LIBRARIES := gnustl_shared  bz2 ssl expat Ice		
+		
 
 LOCAL_CFLAGS := $(GLOBAL_CFLAGS)
 LOCAL_C_INCLUDES := $(GLOBAL_C_INCLUDES)
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)

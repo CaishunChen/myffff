@@ -9,7 +9,7 @@
 
 #include <Ice/Ice.h>
 #include <IceUtil/Thread.h>
-#include <IceUtil/Time.h>
+#include <IceUtil/Timex.h>
 #include <TestCommon.h>
 #include <Test.h>
 
