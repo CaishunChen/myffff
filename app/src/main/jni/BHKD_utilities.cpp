@@ -1,14 +1,9 @@
-#ifdef _WIN32
+
 
 #include "stdafx.h"
 
-#else
 
-typedef int BOOL;
-#define TRUE 1
-#define FALSE 0
 
-#endif // _WIN32
 
 #include "BHKD_utilities.h"
 #include <vector>

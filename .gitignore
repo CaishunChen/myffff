@@ -5,3 +5,5 @@
 .DS_Store
 /build
 /captures
+/app/src/main/jni/win32/FixcomTest/bin/*.ilk
+/app/src/main/jni/win32/FixcomTest/bin/*.pdb
