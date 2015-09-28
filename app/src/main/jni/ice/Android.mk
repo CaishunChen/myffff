@@ -235,9 +235,8 @@ GLOBAL_CFLAGS  := -DICE_API_EXPORTS -D_REENTRANT -DNDEBUG
 		-fdata-sections -ffunction-sections -isystem $(SYSROOT)/usr/include/
 		
 		
-LOCAL_SHARED_LIBRARIES := gnustl_shared  bz2 ssl expat 	IceUtil	
-		
-
+LOCAL_SHARED_LIBRARIES := gnustl_shared  bz2 ssl expat 	IceUtil			
+LOCAL_STATIC_LIBRARIES := mcpp
 LOCAL_CFLAGS := $(GLOBAL_CFLAGS)
 LOCAL_C_INCLUDES := $(GLOBAL_C_INCLUDES)
 
