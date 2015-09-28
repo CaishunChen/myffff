@@ -13,7 +13,7 @@ LOCAL_PATH := $(MY_PATH)
 LOCAL_MODULE    := Fixcom
 LOCAL_SRC_FILES := ./com_example_eric_iceeandroid_NdkJniUtils.c
 LOCAL_CPP_FEATURES := rtti exceptions
-LOCAL_SHARED_LIBRARIES := gnustl_shared  bz2 ssl expat Ice
+LOCAL_SHARED_LIBRARIES := gnustl_shared  bz2 ssl expat IceUtil Ice
 LOCAL_STATIC_LIBRARIES := mcpp
 LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -llog
 

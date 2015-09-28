@@ -138,20 +138,7 @@ sigwaitThread(void*)
         {
             continue;
         }
-        assert(rc == 0);
-        
-        rc = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, 0);
-        assert(rc == 0);
-        
-        CtrlCHandlerCallback callback = _handler->getCallback();
-        
-        if(callback != 0)
-        {
-            callback(signal);
-        }
-
-        rc = pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
-        assert(rc == 0);
+		continue;
     }
     return 0;
 }
