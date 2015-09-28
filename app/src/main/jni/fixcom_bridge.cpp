@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "fixcom_bridge.h"
 #include <FixCommA/FixCommA.h>
 #include "BHKD_utilities.h"

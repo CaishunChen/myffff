@@ -136,7 +136,7 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"/>
+						UsePrecompiledHeader="3"/>
 				</FileConfiguration>
 			</File>
 			<File
