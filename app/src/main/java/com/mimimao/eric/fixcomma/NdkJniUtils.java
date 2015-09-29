@@ -5,7 +5,7 @@ package com.mimimao.eric.fixcomma;
  */
 public class NdkJniUtils {
     static {
-        System.loadLibrary("FixcomTest");	//defaultConfig.ndk.moduleName
+        System.loadLibrary("JFixCommA");	//defaultConfig.ndk.moduleName
     }
     public native String getCLanguageString();
 }

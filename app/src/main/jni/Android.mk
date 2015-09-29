@@ -13,8 +13,8 @@ $(call import-module,FixCommA)
 include $(CLEAR_VARS)
 LOCAL_PATH := $(MY_PATH)
 
-LOCAL_MODULE    := FixcomTest
-LOCAL_SRC_FILES := com_mimimao_eric_fixcomma_NdkJniUtils.c fixcom_bridge.cpp BHKD_utilities.cpp
+LOCAL_MODULE    := JFixCommA
+LOCAL_SRC_FILES := com_mimimao_eric_fixcomma_NdkJniUtils.c fixcom_bridge.cpp BHKD_utilities.cpp com_mimimao_eric_fixcomma_FixcommA.c
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/FixCommA/include
 LOCAL_CPP_FEATURES := rtti exceptions
 LOCAL_SHARED_LIBRARIES := gnustl_shared  bz2 expat IceUtil Ice sdl FixCommA

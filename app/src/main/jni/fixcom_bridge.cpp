@@ -364,7 +364,7 @@ long	GetLong ( void * apThis,int nFixCode )
 }
 
 
-int  GetString( void * apThis,int nFixCode , char ** appBuffer, int * apBufferSize)
+int  GetString( void * apThis,int nFixCode , char * appBuffer, int * apBufferSize)
 {
 	CHECK_POINTER_RETURN(apThis,0);
 
@@ -376,17 +376,22 @@ int  GetString( void * apThis,int nFixCode , char ** appBuffer, int * apBufferSi
 
 	if (appBuffer == NULL || apBufferSize == NULL || *apBufferSize <= lstrRet.length())
 	{
+		if (apBufferSize == NULL)
+		{
+			return 0;
+		}
+
 		*apBufferSize = lstrRet.length()+1;
 
 		return 0;
 	}
 
-	memcpy(*appBuffer,lstrRet.c_str(),lstrRet.length()+1);
+	memcpy(appBuffer,lstrRet.c_str(),lstrRet.length()+1);
 
 	return lstrRet.length()+1;
 };
 
-int  GetItemString( void * apThis,int nFixCode, char ** appBuffer, int * apBufferSize )
+int  GetItemString( void * apThis,int nFixCode, char * appBuffer, int * apBufferSize )
 {
 	CHECK_POINTER_RETURN(apThis,0);
 
@@ -398,12 +403,17 @@ int  GetItemString( void * apThis,int nFixCode, char ** appBuffer, int * apBuffe
 
 	if (appBuffer == NULL || apBufferSize == NULL || *apBufferSize <= lstrRet.length())
 	{
+		if (apBufferSize == NULL)
+		{
+			return 0;
+		}
+
 		*apBufferSize = lstrRet.length()+1;
 
 		return 0;
 	}
 
-	memcpy(*appBuffer,lstrRet.c_str(),lstrRet.length()+1);
+	memcpy(appBuffer,lstrRet.c_str(),lstrRet.length()+1);
 
 	return lstrRet.length()+1;
 

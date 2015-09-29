@@ -1,3 +1,5 @@
+#ifndef _WIN32
+
 #include "com_mimimao_eric_fixcomma_NdkJniUtils.h"
 
 #include "fixcom_bridge.h"
@@ -23,3 +25,5 @@ JNIEXPORT jstring JNICALL Java_com_mimimao_eric_fixcomma_NdkJniUtils_getCLanguag
 	 }
      
   }
+
+#endif

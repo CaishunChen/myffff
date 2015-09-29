@@ -3,6 +3,13 @@
 
 #ifndef _WIN32
 #include <stdbool.h>
+#ifndef NULL
+#define NULL 0
+#define null NULL
+#endif
+#ifndef null
+#define null NULL
+#endif
 #endif
 
 #ifdef __cplusplus
@@ -38,9 +45,9 @@ extern "C" {
 
 		long	(*GetLong)    ( void * apThis,int nFixCode );
 
-		int  (*GetString)   ( void * apThis,int nFixCode , char ** appBuffer, int * apBufferSize);
+		int  (*GetString)   ( void * apThis,int nFixCode , char * appBuffer, int * apBufferSize);
 
-		int  (*GetItemString) ( void * apThis,int nFixCode , char ** appBuffer, int * apBufferSize ); 
+		int  (*GetItemString) ( void * apThis,int nFixCode , char * appBuffer, int * apBufferSize ); 
 
 		bool    (*SetItemDouble)(  void * apThis,int nFixCode , double      dValue   ); 
 
