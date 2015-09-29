@@ -203,5 +203,8 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="FixcomTest.rc"/>
 	</Globals>
 </VisualStudioProject>

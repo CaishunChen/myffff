@@ -4,7 +4,8 @@
 #include "stdafx.h"
 #include "FixcomTest.h"
 #include "FixcomTestDlg.h"
-
+#include "../../../fixcom_bridge.h"
+#include ".\fixcomtestdlg.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -61,6 +62,7 @@ BEGIN_MESSAGE_MAP(CFixcomTestDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDOK, OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -144,4 +146,9 @@ void CFixcomTestDlg::OnPaint()
 HCURSOR CFixcomTestDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
+}
+
+void CFixcomTestDlg::OnBnClickedOk()
+{
+	int lnRet = test();
 }
