@@ -20,7 +20,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/IP_Address" />
 
-    <Button android:id="@+id/Demo" android:text="@string/Demo" android:layout_width="wrap_content"
+    <Button android:id="@+id/Demo" android:text="@string/Demo24000" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button android:id="@+id/Demo20025" android:text="@string/Demo20025" android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <Button android:id="@+id/Sensor" android:text="@string/Sensor" android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

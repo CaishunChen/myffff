@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">FixcommA</string>
-    <string name="Demo">demo</string>
-    <string name="Sensor">Sensor</string>
+    <string name="Demo24000">Demo 24000</string>
+    <string name="Demo20025">Demo 20025</string>
+    <string name="Sensor">Sensor       </string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 </resources>

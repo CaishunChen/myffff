@@ -22,6 +22,15 @@ extern "C" {
  */
   int test();
 
+  typedef enum 
+  {
+	__STRING__LANG__SUPPORTTED_UTF_16,
+	__STRING__LANG__SUPPORTTED_UTF_8,
+	__STRING__LANG__SUPPORTTED_ASCII_CP936,
+	__STRING__LANG__SUPPORTTED_ASCII_GBK,
+	__STRING__LANG__SUPPORTTED_ASCII_GB2312,
+  } __STRING__LANG__SUPPORTTED;
+
 
   typedef struct 
   {
@@ -55,11 +64,26 @@ extern "C" {
 
 		bool    (*SetItemInt)( void * apThis, int nFixCode , int         nValue   );
 
-		bool    (*SetItemString)( void * apThis, int nFixCode , const char *pszData ); // 设置某请求域字符串数据 -- 字符串
+		bool    (*SetItemString)( void * apThis, int nFixCode , const char *pszData ); 
 
 		bool	(*SetItemBuf)(  void * apThis,int nFixCode, char *pBuf, int nSize );
 
 		bool	(*IsValidPointer)( void * apThis); //返回是否是合法的this指针
+
+
+		int  (*GetItemStringEnc) (	void * apThis,
+									int nFixCode , 
+									char * appBuffer, 
+									int * apBufferSize,
+									__STRING__LANG__SUPPORTTED encSrc, 
+									__STRING__LANG__SUPPORTTED encDst); 
+
+		bool  (*SetItemStringEnc)( void * apThis, 
+									int nFixCode , 
+									const char *pszData ,
+									__STRING__LANG__SUPPORTTED encSrc, 
+									__STRING__LANG__SUPPORTTED encDst);
+
 
 
   }ICommInterFace__VTable ,* LP_ICommInterFace__VTable;

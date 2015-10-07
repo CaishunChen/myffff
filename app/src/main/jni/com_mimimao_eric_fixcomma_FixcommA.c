@@ -123,9 +123,11 @@ JNIEXPORT void JNICALL Java_com_mimimao_eric_fixcomma_FixcommA__1SetTimeOut
 	   
 		lnRet = apData->m_pVTable->GetString(apData,nFixCode,lpData,&lnDataSize);
 	   
-		return (*env)->NewStringUTF(env,lpData); 
+		jstring lstrRet =  (*env)->NewStringUTF(env,lpData); 
 	   
 		free(lpData);
+
+		return lstrRet;
   }
   
 JNIEXPORT jstring JNICALL Java_com_mimimao_eric_fixcomma_FixcommA__1GetItemString
@@ -137,17 +139,34 @@ JNIEXPORT jstring JNICALL Java_com_mimimao_eric_fixcomma_FixcommA__1GetItemStrin
 	   
 		ICommInterFaceC * apData = (ICommInterFaceC *)anObj;	   
 	   
-		lnRet = apData->m_pVTable->GetString(apData,nFixCode,NULL,&lnDataSize);
+		lnRet = apData->m_pVTable->GetItemStringEnc(apData,
+													nFixCode,
+													NULL,
+													&lnDataSize,
+													__STRING__LANG__SUPPORTTED_ASCII_GBK,
+													__STRING__LANG__SUPPORTTED_UTF_8);
+
+		if (lnDataSize ==0)
+		{
+		  return (*env)->NewStringUTF(env,""); 
+		}
 	   
 		char * lpData = (char *)malloc(lnDataSize);
 	   
 		memset(lpData,0,lnDataSize);
 	   
-		lnRet = apData->m_pVTable->GetString(apData,nFixCode,lpData,&lnDataSize);
+		lnRet = apData->m_pVTable->GetItemStringEnc(apData,
+													nFixCode,
+													lpData,
+													&lnDataSize,
+													__STRING__LANG__SUPPORTTED_ASCII_GBK,
+													__STRING__LANG__SUPPORTTED_UTF_8);
 	   
-		return (*env)->NewStringUTF(env,lpData); 
+		jstring lstrRet = (*env)->NewStringUTF(env,lpData); 
 	   
 		free(lpData);  
+
+		return lstrRet;
   }
   
   JNIEXPORT jboolean JNICALL Java_com_mimimao_eric_fixcomma_FixcommA__1SetItemDouble
@@ -187,7 +206,11 @@ JNIEXPORT jstring JNICALL Java_com_mimimao_eric_fixcomma_FixcommA__1GetItemStrin
 		path = (*env)->GetStringUTFChars( env, astrValue , NULL ) ;
 
 	  
-		lnRet = apData->m_pVTable->SetItemString(apData,nFixCode,path);
+		lnRet = apData->m_pVTable->SetItemStringEnc(apData,
+													nFixCode,
+													path,
+													__STRING__LANG__SUPPORTTED_UTF_8,
+													__STRING__LANG__SUPPORTTED_ASCII_GB2312);
 	  
 		return lnRet;  
   }

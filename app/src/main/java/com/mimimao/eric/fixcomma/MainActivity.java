@@ -4,14 +4,12 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
-import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.hardware.SensorEventListener;
@@ -83,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.Demo).setOnClickListener(this);
         findViewById(R.id.Sensor).setOnClickListener(this);
+        findViewById(R.id.Demo20025).setOnClickListener(this);
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -209,6 +208,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    protected void OnTest20025()
+    {
+        TextView mTextView = (TextView) this.findViewById(R.id.test);
+
+        Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
+
+
+
+            arefFixCom.CreateHead(20025);
+
+
+            while (arefFixCom.More())
+            {
+                String lstrCompany = arefFixCom.GetItemString(15004);
+                String lstrFactory = arefFixCom.GetItemString(15003);
+                String lstrPlant = arefFixCom.GetItemString(10013);
+                mTextView.setText("Demo succeed more:" + lstrCompany + "|"+lstrFactory+"|"+lstrPlant);
+            }
+
+
+    }
+
     protected void OnTestDemo()
     {
         TextView mTextView = (TextView) this.findViewById(R.id.test);
@@ -253,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             arefFixCom.CreateHead(24000);
-            arefFixCom.SetItemString(15004, "c");
+            arefFixCom.SetItemString(15004, "测试");
             arefFixCom.SetItemString(15003, "f");
             arefFixCom.SetItemString(10013, "p");
             arefFixCom.SetItemInt(14019, 0);
@@ -357,6 +378,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.Sensor:
                 this.OnTestSensor();
+                break;
+            case R.id.Demo20025:
+                this.OnTest20025();
                 break;
             default:
                 break;

@@ -3,10 +3,34 @@ package com.mimimao.eric.fixcomma;
 /**
  * Created by eric on 2015/9/29.
  */
+import android.util.Log;
+
+import com.tendcloud.tenddata.TCAgent;
 public class FixcommA {
 
     static {
-        System.loadLibrary("JFixCommA");	//defaultConfig.ndk.moduleName
+
+        try
+        {
+            System.loadLibrary("FixCommA");
+        }catch (Exception e)
+        {
+            Log.e("test",e.getMessage(),e);
+        }
+        //defaultConfig.ndk.moduleName
+    }
+    static {
+
+        try
+        {
+            System.loadLibrary("JFixCommA");
+        }catch (Exception e)
+        {
+            Log.e("test",e.getMessage(),e);
+        }catch (UnsatisfiedLinkError e) {
+            System.loadLibrary("<sample-jni>"); //remove lib and .so from name
+        }
+       	//defaultConfig.ndk.moduleName
     }
 
     FixcommA()

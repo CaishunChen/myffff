@@ -6,14 +6,131 @@
 #include "FixDef_Field.h"
 #include <vector>
 #include <string>
+#include <iconv.h>
 #define RtlZeroMemory(Destination,Length) memset((Destination),0,(Length))
 #define ZeroMemory RtlZeroMemory
 using namespace BHKD;
 
 #ifndef _WIN32
+#define __iconv_open iconv_open
+#define __iconv_close iconv_close
+#define __iconv iconv
+#else
+#define __iconv_open libiconv_open
+#define __iconv_close libiconv_close
+#define __iconv libiconv
+#endif
+
+int code_convert(char *from_charset,
+				 char *to_charset,
+				 char *inbuf,
+				 unsigned int  *inlen,
+				 char *outbuf,
+				 unsigned int  *outlen) 
+{ 
+	if (inlen == NULL || inbuf == NULL || from_charset == NULL || to_charset == NULL)
+	{
+		return -1;
+	}
+
+	if (outlen == NULL)
+	{
+		return -1;
+	}
+
+	iconv_t cd;
+
+	int rc; 
+
+	const char **pin = (const char **)&inbuf; 
+
+	char **pout = &outbuf; 
+
+	cd = __iconv_open(to_charset,from_charset); 
+
+	if (cd<0)
+	{
+		return -1;
+	}; 
+
+	memset(outbuf,0,*outlen); 
+
+	if (__iconv(cd,pin,(size_t *)inlen,pout,(size_t *)outlen)==-1) 
+	{
+		__iconv_close(cd); 
+
+		return -1; 
+	}
+
+	__iconv_close(cd); 
+
+	return 1; 
+} 
+
+int convert(char *inbuf,
+			size_t * inlen,
+			char *outbuf,
+			size_t * outlen,
+			__STRING__LANG__SUPPORTTED src,
+			__STRING__LANG__SUPPORTTED dst)
+{
+	std::string CODE_PAGE_GBK = "GBK";
+
+	std::string CODE_PAGE_UTF_8= "UTF-8";
+
+	std::string CODE_PAGE_UTF_16= "UTF-16";
+
+	char * lpEncSrc = NULL;
+
+	char  * lpEncDst = NULL;
+
+	switch(src)
+	{
+	case __STRING__LANG__SUPPORTTED_ASCII_GBK:
+	case __STRING__LANG__SUPPORTTED_ASCII_GB2312:
+	case __STRING__LANG__SUPPORTTED_ASCII_CP936:
+		lpEncSrc = (char *)CODE_PAGE_GBK.c_str();
+		break;
+	case __STRING__LANG__SUPPORTTED_UTF_16:
+		lpEncSrc = (char *)CODE_PAGE_UTF_16.c_str();
+		break;
+	case __STRING__LANG__SUPPORTTED_UTF_8:
+		lpEncSrc = (char *)CODE_PAGE_UTF_8.c_str();
+		break;
+	default:
+		return -1;		
+	}
+
+	switch(dst)
+	{
+	case __STRING__LANG__SUPPORTTED_ASCII_GBK:
+	case __STRING__LANG__SUPPORTTED_ASCII_GB2312:
+	case __STRING__LANG__SUPPORTTED_ASCII_CP936:
+		lpEncDst = (char *)CODE_PAGE_GBK.c_str();
+		break;
+	case __STRING__LANG__SUPPORTTED_UTF_16:
+		lpEncDst = (char *)CODE_PAGE_UTF_16.c_str();
+		break;
+	case __STRING__LANG__SUPPORTTED_UTF_8:
+		lpEncDst = (char *)CODE_PAGE_UTF_8.c_str();
+		break;
+	default:
+		return -1;		
+	}
+
+	int lnRet = code_convert(lpEncSrc,lpEncDst,inbuf,inlen,outbuf,outlen);
+
+	return lnRet;
+}
+
+#ifndef _WIN32
 #include <pthread.h>
 #include <unistd.h>
+
 #define Sleep usleep
+
+
+
 #endif
 
 int TestOriginal()
@@ -92,8 +209,50 @@ int TestOriginal()
 	return 0;
 }
 
+int Test20025()
+{
+	ICommInterFaceC * lpICommInterFaceC = NULL;
+
+	int lnRet = CreateICommInterFaceC(&lpICommInterFaceC);
+
+	lnRet =  lpICommInterFaceC->m_pVTable->Link(lpICommInterFaceC,"127.0.0.1",17001);
+
+	lpICommInterFaceC->m_pVTable->CreateHead(lpICommInterFaceC,20025);
+
+	while(lpICommInterFaceC->m_pVTable->More(lpICommInterFaceC))
+	{
+		std::vector<char> loBuffer(1024);
+
+		char * lpBuffer = &loBuffer.front();
+
+		int lnSize = 0;
+
+		lpICommInterFaceC->m_pVTable->GetItemStringEnc(lpICommInterFaceC,
+														10013,
+														NULL,
+														&lnSize,
+														__STRING__LANG__SUPPORTTED_ASCII_GBK,
+														__STRING__LANG__SUPPORTTED_UTF_8);
+
+		lpICommInterFaceC->m_pVTable->GetItemStringEnc(lpICommInterFaceC,
+			10013,
+			lpBuffer,
+			&lnSize,
+			__STRING__LANG__SUPPORTTED_ASCII_GBK,
+			__STRING__LANG__SUPPORTTED_UTF_8);
+#ifdef _WIN32
+		CString lstrData = lpBuffer;
+#endif // _WIN32
+
+		
+	}
+
+	return 0;
+}
+
 int TestNew()
 {
+	Test20025();
 	int lnLoopCount = 0;
 
 	while(1)
@@ -109,7 +268,7 @@ int TestNew()
 		
 		
 
-		 lnRet =  lpICommInterFaceC->m_pVTable->Link(lpICommInterFaceC,"192.168.1.107",17001);
+		 lnRet =  lpICommInterFaceC->m_pVTable->Link(lpICommInterFaceC,"127.0.0.1",17001);
 		if(lnRet>0)
 		{
 			std::vector<S_VibCharValue> loVibs;
@@ -147,7 +306,7 @@ int TestNew()
 
 			lpICommInterFaceC->m_pVTable->CreateHead(lpICommInterFaceC,24000);
 
-			lpICommInterFaceC->m_pVTable->SetItemString(lpICommInterFaceC,FIELD_SYSTEM_COMPANY, "c");
+			lpICommInterFaceC->m_pVTable->SetItemStringEnc(lpICommInterFaceC,FIELD_SYSTEM_COMPANY, "c",__STRING__LANG__SUPPORTTED_UTF_8,__STRING__LANG__SUPPORTTED_ASCII_GBK);
 			lpICommInterFaceC->m_pVTable->SetItemString(lpICommInterFaceC,FIELD_SYSTEM_FACTORY, "f");
 			lpICommInterFaceC->m_pVTable->SetItemString(lpICommInterFaceC,FIELD_SERVICE_PLANTID,"p");		
 			lpICommInterFaceC->m_pVTable->SetItemLong(lpICommInterFaceC,FIELD_SERVICE_ON_SEND_STARTID, 0);
@@ -386,7 +545,9 @@ int  GetString( void * apThis,int nFixCode , char * appBuffer, int * apBufferSiz
 		return 0;
 	}
 
-	memcpy(appBuffer,lstrRet.c_str(),lstrRet.length()+1);
+	memset(appBuffer,0,lstrRet.length()+1);
+
+	memcpy(appBuffer,lstrRet.c_str(),lstrRet.length());
 
 	return lstrRet.length()+1;
 };
@@ -413,7 +574,9 @@ int  GetItemString( void * apThis,int nFixCode, char * appBuffer, int * apBuffer
 		return 0;
 	}
 
-	memcpy(appBuffer,lstrRet.c_str(),lstrRet.length()+1);
+	memset(appBuffer,0,lstrRet.length()+1);
+
+	memcpy(appBuffer,lstrRet.c_str(),lstrRet.length());	
 
 	return lstrRet.length()+1;
 
@@ -468,6 +631,11 @@ bool SetItemString( void * apThis, int nFixCode , const char *pszData )
 
 	CFixCommA * lpFixComm = (CFixCommA *)lpComm->m_pFixCom;
 
+	if (NULL == pszData )
+	{
+		return 0;
+	}
+
 	bool ldblRet = lpFixComm->SetItem(nFixCode,pszData);
 
 	return ldblRet;
@@ -486,6 +654,120 @@ bool SetItemBuf(  void * apThis,int nFixCode, char *pBuf, int nSize )
 
 	return ldblRet;
 }
+
+int  GetItemStringEnc (	void * apThis,
+					   int nFixCode , 
+					   char * appBuffer, 
+					   int * apBufferSize,
+					   __STRING__LANG__SUPPORTTED encSrc, 
+					   __STRING__LANG__SUPPORTTED encDst)
+{
+
+	CHECK_POINTER_RETURN(apThis,0);
+
+	if (apBufferSize == NULL)
+	{
+		return 0;
+	}
+
+	unsigned int lnDataSize = 0;
+
+	int lnRet = GetItemString(apThis,nFixCode,NULL,(int *)&lnDataSize);
+
+	if (lnDataSize<=0)
+	{
+		return 0;
+	}
+
+	std::vector<char> loBuffer(lnDataSize+2);
+
+	char * lpBuffer =  &loBuffer.front();
+
+	lnRet = GetItemString(apThis,nFixCode,lpBuffer,(int *)&lnDataSize);
+
+	std::vector<char> loBufferOut(lnDataSize*5);
+
+	char * lpBufferOut = &loBufferOut.front();
+
+	unsigned int lnBufferOut = loBufferOut.size();
+
+	if (lnRet>0)
+	{
+		lnRet = convert(lpBuffer,&lnDataSize,lpBufferOut,&lnBufferOut,encSrc,encDst);
+
+		if (lnRet>=0)
+		{
+			if(*apBufferSize<(loBufferOut.size()-lnBufferOut+1))
+			{
+				*apBufferSize = loBufferOut.size() - lnBufferOut+1;
+
+				return 0;
+			}
+
+			memcpy(appBuffer,lpBufferOut,(loBufferOut.size() - lnBufferOut+1));
+			
+		}
+		
+	}
+
+	if (lnRet<0)
+	{
+		lnRet =0;
+	}
+
+	return lnRet;
+
+}
+
+bool  SetItemStringEnc( void * apThis, 
+					   int nFixCode , 
+					   const char *pszData ,
+					   __STRING__LANG__SUPPORTTED encSrc, 
+					   __STRING__LANG__SUPPORTTED encDst)
+{
+
+
+	CHECK_POINTER_RETURN(apThis,0);
+
+	ICommInterFaceC * lpComm = (ICommInterFaceC *)apThis;
+
+	CFixCommA * lpFixComm = (CFixCommA *)lpComm->m_pFixCom;
+
+	if (NULL == pszData)
+	{
+		return 0;
+	}
+
+	size_t lnStrLength = strlen(pszData);
+
+	size_t lnDataSize = (int)lnStrLength;
+
+	if (lnDataSize==0 || lnDataSize > 409600)
+	{
+		return 0;
+	}
+
+	std::vector<char> loOutBuffer(lnDataSize*4+2);
+
+	char * lpBufferOut = &loOutBuffer.front();
+
+	size_t lnOutSize = loOutBuffer.size();
+
+	size_t lnOutLeft = lnOutSize;
+
+	int lnRet = convert((char *)pszData,&lnDataSize,lpBufferOut,&lnOutSize,encSrc,encDst);
+
+	if (lnRet<0)
+	{
+		return 0;
+	}
+	
+	bool ldblRet = lpFixComm->SetItem(nFixCode,(const char *)lpBufferOut);
+
+	return ldblRet;
+
+}
+
 
 int CreateICommInterFaceC( ICommInterFaceC ** apData )
 {
@@ -549,7 +831,10 @@ int CreateICommInterFaceC( ICommInterFaceC ** apData )
 
 	(*apData)->m_pVTable->SetTimeOut = SetTimeOut;
 
+	(*apData)->m_pVTable->GetItemStringEnc = GetItemStringEnc;
 
+	(*apData)->m_pVTable->SetItemStringEnc = SetItemStringEnc;
+	
 	return TRUE;
 }
 
@@ -586,7 +871,6 @@ int DeleteICommInterFaceC( ICommInterFaceC * apData )
 	return TRUE;
 
 }
-
 
 
 
