@@ -24,7 +24,7 @@ public class S_VibCharValue {
     int  _iRev= 0;       //转速
     public byte[] getBytes()
     {
-        ByteBuffer buffer = ByteBuffer.allocate(1000);
+        ByteBuffer buffer = ByteBuffer.allocate(60);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.putFloat(this._fCharAll);
         buffer.putFloat(this._fCharHalf);

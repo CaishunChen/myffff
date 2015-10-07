@@ -4,17 +4,25 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.hardware.SensorEventListener;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import com.tendcloud.tenddata.TCAgent;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,SensorEventListener {
 
@@ -27,7 +35,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private float last_x, last_y, last_z;
     private static final int SHAKE_THRESHOLD = 600;
 
+    public  String m_strIP = "192.168.31.162";
 
+    int m_nMaxWaveData = 4096;
+
+
+    private Queue<Byte> m_oWaveBuffers = null;
+
+    protected void resetWaveBuffer()
+    {
+        if (null == this.m_oWaveBuffers)
+        {
+            this.m_oWaveBuffers = new CircularFifoQueue<>(this.m_nMaxWaveData*2);
+        }
+
+        int lnDataSize = this.m_nMaxWaveData*2;
+
+        for (int i=0;i<lnDataSize;i++)
+        {
+            this.m_oWaveBuffers.add((byte)0);
+        }
+    }
 
     protected void clearResource()
     {
@@ -49,6 +77,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        TCAgent.LOG_ON=true;
+        TCAgent.init(this);
+        TCAgent.setReportUncaughtExceptions(true);
 
         findViewById(R.id.Demo).setOnClickListener(this);
         findViewById(R.id.Sensor).setOnClickListener(this);
@@ -57,6 +88,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        EditText loIp = (EditText) this.findViewById(R.id.IP_Address);
+        if (null!=loIp)
+        {
+            loIp.setText(this.m_strIP);
+        }
+
+        this.resetWaveBuffer();
     }
 
     @Override
@@ -84,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void OnTestSensor() {
         TextView mTextView = (TextView) this.findViewById(R.id.test);
 
-        Boolean lnRet = arefFixCom.Link("192.168.1.107", 17001);
+        Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
 
         if (lnRet)
         {
@@ -118,16 +156,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 loVibs.put(loValue.getBytes());
             }
 
+            loVibs.flip();
+
+            ArrayList<Byte> loList = null;
+
+            try
+            {
+                loList = new ArrayList<>(this.m_oWaveBuffers);
+            }catch (Exception e3)
+            {
+                Log.e("eeeee",e3.getMessage());
+            }
+
+
+
+
+            ByteBuffer loTemp = ByteBuffer.allocate(loList.size());
+
+            loTemp.order(ByteOrder.LITTLE_ENDIAN);
+
+            for (int i=0;i<loList.size();i++)
+            {
+                loTemp.put(loList.get(i));
+            }
+
+            loTemp.flip();
+
             arefFixCom.CreateHead(24000);
             arefFixCom.SetItemString(15004, "c");
             arefFixCom.SetItemString(15003, "f");
             arefFixCom.SetItemString(10013, "p");
             arefFixCom.SetItemInt(14019, 0);
             arefFixCom.SetItemInt(14002, 2);
-            arefFixCom.SetItemInt(14003, this.m_oWaves.array().length);
+            arefFixCom.SetItemInt(14003, this.m_oWaveBuffers.size());
             arefFixCom.SetItemInt(10051, 1);
             arefFixCom.SetItemBuf(14012, loVibs.array());
-            arefFixCom.SetItemBuf(14001, this.m_oWaves.array());
+            arefFixCom.SetItemBuf(14001, loTemp.array());
             arefFixCom.SetItemInt(10084, -1);
             arefFixCom.SetItemString(10009, "1900-01-01 17:00:00");
             arefFixCom.SetItemInt(10086, 123);
@@ -149,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         TextView mTextView = (TextView) this.findViewById(R.id.test);
 
-        Boolean lnRet = arefFixCom.Link("192.168.1.107", 17001);
+        Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
 
         if (lnRet)
         {
@@ -215,10 +279,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    int m_nMaxWaveData = 512;
-
-    ByteBuffer m_oWaves = null;
-
     int m_PushedCount = 0;
 
     @Override
@@ -240,34 +300,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
 
-                if (speed > SHAKE_THRESHOLD) {
+
+
+                if (speed > SHAKE_THRESHOLD)
+                {
 
                 }
 
-                if (this.m_oWaves!=null && this.m_PushedCount>=30)
+                if (this.m_PushedCount>=5)
                 {
-                   this.OnTestSensor();
-                    this.m_oWaves.clear();
+                    this.OnTestSensor();
+
                     this.m_PushedCount = 0;
+
                 }else
                 {
 
                 }
 
-                if (this.m_oWaves == null  )
-                {
-                    this.m_oWaves = ByteBuffer.allocate(this.m_nMaxWaveData);
-
-                    this.m_oWaves.order(ByteOrder.LITTLE_ENDIAN);
-                }
-
-
                 short m = (short)(last_x*10);
                 last_x = x;
 
-                this.m_oWaves.putShort(m);
                 m_PushedCount++;
-           //     this.OnTestSensor();
+
+                ByteBuffer loTemp = ByteBuffer.allocate(2);
+
+                loTemp.order(ByteOrder.LITTLE_ENDIAN);
+
+                loTemp.putShort((short)m);
+
+                this.m_oWaveBuffers.add(loTemp.get(0));
+
+                this.m_oWaveBuffers.add(loTemp.get(1));
+
                 last_y = y;
                 last_z = z;
             }
@@ -281,6 +346,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onClick(View v)
     {
+        EditText loIp = (EditText) this.findViewById(R.id.IP_Address);
+        if (null!=loIp)
+        {
+            this.m_strIP = loIp.getText().toString();
+        }
         switch (v.getId()) {
             case R.id.Demo:
                 this.OnTestDemo();

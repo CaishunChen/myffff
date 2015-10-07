@@ -27,4 +27,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.0.1'
+    compile files('libs/commons-collections4-4.0.jar')
+    compile files('TalkingDataAnalytics_V2.0.4.jar')
 }

@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -30,6 +31,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data android:name="TD_APP_ID" android:value="F0E2FFF994053714CC0C103A39787F32" />
+        <meta-data android:name="TD_CHANNEL_ID" android:value="Your_channel_id"/>
     </application>
 
 </manifest>
