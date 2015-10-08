@@ -28,8 +28,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    private SensorManager senSensorManager;
-    private Sensor senAccelerometer;
+    private SensorManager senSensorManager = null;
+    private Sensor senAccelerometer = null;
+    private Sensor senTemperature = null;
+    private Sensor senPressure = null;
 
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int m_nMaxWaveData = 256;
 
 
-    private Queue<Byte> m_oWaveBuffers = null;
+    private Queue<S_VibCharValue> m_oWaveBuffers = null;
 
     protected synchronized void resetWaveBuffer()
     {
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         for (int i=0;i<lnDataSize;i++)
         {
-            this.m_oWaveBuffers.add((byte)0);
+            this.m_oWaveBuffers.add(new S_VibCharValue());
         }
     }
 
@@ -86,7 +88,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        senTemperature = senSensorManager.getDefaultSensor(Sensor.TYPE_TEMPERATURE);
+
+        if(null!=senTemperature)
+        {
+            senSensorManager.registerListener(this, senTemperature, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        senPressure = senSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+
+        if(null!=senPressure)
+        {
+            senSensorManager.registerListener(this, senPressure, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        if (null!=senSensorManager)
+        {
+            senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+
 
         EditText loIp = (EditText) this.findViewById(R.id.IP_Address);
         if (null!=loIp)
@@ -143,13 +163,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 loVibs.order(ByteOrder.LITTLE_ENDIAN);
 
 
-                ArrayList<Byte> loList = null;
+                ArrayList<S_VibCharValue> loList = null;
 
                 int lnDataSize = 0;
 
                 ByteBuffer loTemp = null;
 
                 float lfMax = 0;
+                float lfMax_x = 0;
+                float lfMax_y = 0;
+                float lfMax_z = 0;
 
                 synchronized(this)
                 {
@@ -165,13 +188,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     lnDataSize = this.m_oWaveBuffers.size();
 
-                    loTemp = ByteBuffer.allocate(loList.size());
+                    loTemp = ByteBuffer.allocate(loList.size()*2);
 
                     loTemp.order(ByteOrder.LITTLE_ENDIAN);
 
+                    ByteBuffer loTempByte = ByteBuffer.allocate(2);
+
+                    loTempByte.order(ByteOrder.LITTLE_ENDIAN);
+
+
+
                     for (int i=0;i<loList.size();i++)
                     {
-                        loTemp.put(loList.get(i));
+                        if(lfMax<Math.abs(loList.get(i)._fCharAll))
+                        {
+                            lfMax = loList.get(i)._fCharAll;
+                        }
+
+                        if(lfMax_x<Math.abs(loList.get(i)._fCharOne))
+                        {
+                            lfMax_x = loList.get(i)._fCharOne;
+                        }
+
+                        if(lfMax_y<Math.abs(loList.get(i)._fCharTwo))
+                        {
+                            lfMax_y = loList.get(i)._fCharTwo;
+                        }
+
+                        if(lfMax_z<Math.abs(loList.get(i)._fCharThree))
+                        {
+                            lfMax_z = loList.get(i)._fCharThree;
+                        }
+
+                        loTempByte.putShort((short)(loList.get(i)._fCharAll*10));
+                        loTemp.put(loTempByte.get(0));
+                        loTemp.put(loTempByte.get(1));
+                        loTempByte.clear();
                     }
 
                     loTemp.flip();
@@ -181,21 +233,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 for (int i=0;i<2;i++)
                 {
                     S_VibCharValue loValue = new S_VibCharValue();
-                    loValue._fCharAll = 12.34f;
+                    loValue._fCharAll = lfMax/(float)10.0;
                     loValue._fCharHalf = 0;
                     loValue._fPhaseHalf = 0;
 
-                    loValue._fCharOne = 0;
+                    loValue._fCharOne = lfMax_x/(float)10.0;
                     loValue._fPhaseOne = 0;
 
-                    loValue._fCharTwo =0;
+                    loValue._fCharTwo =lfMax_y/(float)10.0;
                     loValue._fPhaseTwo = 0;
 
-                    loValue._fCharThree =0;
+                    loValue._fCharThree =lfMax_z/(float)10.0;
                     loValue._fPhaseThree = 0;
                     loValue._iRev = 1000;
                     loValue._fGap = 0;
-                    loValue._iSmpFreq = 1024;
+                    loValue._iSmpFreq = 100;
                     loValue._iSmpNum = m_nMaxWaveData;
 
 
@@ -348,65 +400,81 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     int m_PushedCount = 0;
 
+    private void onAccSenSorChanged(SensorEvent sensorEvent)
+    {
+        if(null == sensorEvent)
+        {
+            return ;
+        }
+
+        float x = sensorEvent.values[0];
+        float y = sensorEvent.values[1];
+        float z = sensorEvent.values[2];
+
+        long curTime = System.currentTimeMillis();
+
+        if ((curTime - lastUpdate) > 1)
+        {
+            long diffTime = (curTime - lastUpdate);
+            lastUpdate = curTime;
+
+            float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 1000;
+
+            float speed_x = Math.abs(x - last_x )/ diffTime * 1000;
+
+            float speed_y = Math.abs(x - last_x )/ diffTime * 1000;
+
+            float speed_z = Math.abs(x - last_x )/ diffTime * 1000;
+
+            if (this.m_PushedCount>=5)
+            {
+                 this.m_PushedCount = 0;
+
+            }else
+            {
+
+            }
+
+
+            last_x = x;
+            last_y = y;
+            last_z = z;
+            m_PushedCount++;
+
+
+
+            synchronized (this)
+            {
+                S_VibCharValue loValue = new S_VibCharValue();
+                loValue._fCharAll = speed;
+                loValue._fCharOne = speed_x;
+                loValue._fCharTwo = speed_y;
+                loValue._fCharThree = speed_z;
+                this.m_oWaveBuffers.add(loValue);
+            }
+
+
+        }
+    }
+
     @Override
     public void onSensorChanged(SensorEvent sensorEvent)
     {
         Sensor mySensor = sensorEvent.sensor;
 
-        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = sensorEvent.values[0];
-            float y = sensorEvent.values[1];
-            float z = sensorEvent.values[2];
+        int lnType = mySensor.getType();
 
-            long curTime = System.currentTimeMillis();
-
-            if ((curTime - lastUpdate) > 1)
-            {
-                long diffTime = (curTime - lastUpdate);
-                lastUpdate = curTime;
-
-                float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
-
-
-
-                if (speed > SHAKE_THRESHOLD)
-                {
-
-                }
-
-                if (this.m_PushedCount>=5)
-                {
-                  //  this.OnTestSensor();
-
-                    this.m_PushedCount = 0;
-
-                }else
-                {
-
-                }
-
-                short m = (short)(speed*10);
-                last_x = x;
-
-                m_PushedCount++;
-
-                ByteBuffer loTemp = ByteBuffer.allocate(2);
-
-                loTemp.order(ByteOrder.LITTLE_ENDIAN);
-
-                loTemp.putShort(m);
-
-                synchronized (this)
-                {
-                    this.m_oWaveBuffers.add(loTemp.get(0));
-
-                    this.m_oWaveBuffers.add(loTemp.get(1));
-                }
-
-                last_y = y;
-                last_z = z;
-            }
+        switch (lnType)
+        {
+            case Sensor.TYPE_ACCELEROMETER:
+                this.onAccSenSorChanged(sensorEvent);
+                break;
+            case Sensor.TYPE_GRAVITY:
+                this.onAccSenSorChanged(sensorEvent);
+                break;
         }
+
+
     }
 
     class TimerTaskTest extends java.util.TimerTask
