@@ -21,10 +21,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,SensorEventListener {
 
-    FixcommA arefFixCom = new FixcommA();
+
 
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
@@ -33,15 +35,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private float last_x, last_y, last_z;
     private static final int SHAKE_THRESHOLD = 600;
 
-    public  String m_strIP = "192.168.31.162";
+    public  String m_strIP = "192.168.1.107";
 
-    int m_nMaxWaveData = 4096;
+    int m_nMaxWaveData = 256;
 
 
     private Queue<Byte> m_oWaveBuffers = null;
 
-    protected void resetWaveBuffer()
+    protected synchronized void resetWaveBuffer()
     {
+
         if (null == this.m_oWaveBuffers)
         {
             this.m_oWaveBuffers = new CircularFifoQueue<>(this.m_nMaxWaveData*2);
@@ -57,9 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected void clearResource()
     {
-        this.arefFixCom.Close();
 
-        this.arefFixCom.DeleteObject();
     }
 
     @Override
@@ -94,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         this.resetWaveBuffer();
+
+        TimerTaskTest loTask = new TimerTaskTest(this);
+
+        Timer timer = new Timer();
+
+        timer.schedule(loTask,2000,50);
     }
 
     @Override
@@ -118,98 +125,129 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    protected void OnTestSensor() {
-        TextView mTextView = (TextView) this.findViewById(R.id.test);
+    protected  void OnTestSensor()
+    {
+       FixcommA arefFixCom = new FixcommA();
 
-        Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
-
-        if (lnRet)
+        try
         {
-            ByteBuffer loWaves = ByteBuffer.allocate(40960);
-            loWaves.order(ByteOrder.LITTLE_ENDIAN);
 
-            ByteBuffer loVibs = ByteBuffer.allocate(40960);
-            loVibs.order(ByteOrder.LITTLE_ENDIAN);
+            Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
 
-            for (int i=0;i<2;i++)
+            if (lnRet)
             {
-                S_VibCharValue loValue = new S_VibCharValue();
-                loValue._fCharAll = 12.34f;
-                loValue._fCharHalf = 0;
-                loValue._fPhaseHalf = 0;
+                ByteBuffer loWaves = ByteBuffer.allocate(40960);
+                loWaves.order(ByteOrder.LITTLE_ENDIAN);
 
-                loValue._fCharOne = 0;
-                loValue._fPhaseOne = 0;
-
-                loValue._fCharTwo =0;
-                loValue._fPhaseTwo = 0;
-
-                loValue._fCharThree =0;
-                loValue._fPhaseThree = 0;
-                loValue._iRev = 1000;
-                loValue._fGap = 0;
-                loValue._iSmpFreq = 1024;
-                loValue._iSmpNum = m_nMaxWaveData;
+                ByteBuffer loVibs = ByteBuffer.allocate(40960);
+                loVibs.order(ByteOrder.LITTLE_ENDIAN);
 
 
-                loVibs.put(loValue.getBytes());
+                ArrayList<Byte> loList = null;
+
+                int lnDataSize = 0;
+
+                ByteBuffer loTemp = null;
+
+                float lfMax = 0;
+
+                synchronized(this)
+                {
+
+                    try
+                    {
+                        loList = new ArrayList<>(this.m_oWaveBuffers);
+                    }catch (Exception e3)
+                    {
+                        Log.e("eeeee",e3.getMessage());
+                    }
+
+
+                    lnDataSize = this.m_oWaveBuffers.size();
+
+                    loTemp = ByteBuffer.allocate(loList.size());
+
+                    loTemp.order(ByteOrder.LITTLE_ENDIAN);
+
+                    for (int i=0;i<loList.size();i++)
+                    {
+                        loTemp.put(loList.get(i));
+                    }
+
+                    loTemp.flip();
+
+                }
+
+                for (int i=0;i<2;i++)
+                {
+                    S_VibCharValue loValue = new S_VibCharValue();
+                    loValue._fCharAll = 12.34f;
+                    loValue._fCharHalf = 0;
+                    loValue._fPhaseHalf = 0;
+
+                    loValue._fCharOne = 0;
+                    loValue._fPhaseOne = 0;
+
+                    loValue._fCharTwo =0;
+                    loValue._fPhaseTwo = 0;
+
+                    loValue._fCharThree =0;
+                    loValue._fPhaseThree = 0;
+                    loValue._iRev = 1000;
+                    loValue._fGap = 0;
+                    loValue._iSmpFreq = 1024;
+                    loValue._iSmpNum = m_nMaxWaveData;
+
+
+                    loVibs.put(loValue.getBytes());
+                }
+
+                loVibs.flip();
+
+                arefFixCom.CreateHead(24000);
+                arefFixCom.SetItemString(15004, "c");
+                arefFixCom.SetItemString(15003, "f");
+                arefFixCom.SetItemString(10013, "p");
+                arefFixCom.SetItemInt(14019, 0);
+                arefFixCom.SetItemInt(14002, 2);
+                arefFixCom.SetItemInt(14003, lnDataSize);
+                arefFixCom.SetItemInt(10051, 1);
+                arefFixCom.SetItemBuf(14012, loVibs.array());
+                arefFixCom.SetItemBuf(14001, loTemp.array());
+                arefFixCom.SetItemInt(10084, -1);
+                arefFixCom.SetItemString(10009, "1900-01-01 17:00:00");
+                arefFixCom.SetItemInt(10086, 123);
+
+                if (arefFixCom.More())
+                {
+
+                }
+                else
+                {
+
+                }
+            } else
+            {
+
             }
+        }catch(Exception e0)
+        {
+            TCAgent.onError(this,e0);
 
-            loVibs.flip();
-
-            ArrayList<Byte> loList = null;
-
-            try
-            {
-                loList = new ArrayList<>(this.m_oWaveBuffers);
-            }catch (Exception e3)
-            {
-                Log.e("eeeee",e3.getMessage());
-            }
-
-
-
-
-            ByteBuffer loTemp = ByteBuffer.allocate(loList.size());
-
-            loTemp.order(ByteOrder.LITTLE_ENDIAN);
-
-            for (int i=0;i<loList.size();i++)
-            {
-                loTemp.put(loList.get(i));
-            }
-
-            loTemp.flip();
-
-            arefFixCom.CreateHead(24000);
-            arefFixCom.SetItemString(15004, "c");
-            arefFixCom.SetItemString(15003, "f");
-            arefFixCom.SetItemString(10013, "p");
-            arefFixCom.SetItemInt(14019, 0);
-            arefFixCom.SetItemInt(14002, 2);
-            arefFixCom.SetItemInt(14003, this.m_oWaveBuffers.size());
-            arefFixCom.SetItemInt(10051, 1);
-            arefFixCom.SetItemBuf(14012, loVibs.array());
-            arefFixCom.SetItemBuf(14001, loTemp.array());
-            arefFixCom.SetItemInt(10084, -1);
-            arefFixCom.SetItemString(10009, "1900-01-01 17:00:00");
-            arefFixCom.SetItemInt(10086, 123);
-
-            if (arefFixCom.More())
-            {
-                mTextView.setText("Sensor succeed more");
-            }
-            else
-            {
-                mTextView.setText("Sensor failed more");
-            }
-        } else {
-            mTextView.setText("Sensor false");
+        }finally
+        {
+            arefFixCom.Close();
+            arefFixCom.DeleteObject();
+            arefFixCom = null;
         }
+
+
     }
 
     protected void OnTest20025()
     {
+        FixcommA arefFixCom = new FixcommA();
+
         TextView mTextView = (TextView) this.findViewById(R.id.test);
 
         Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
@@ -227,12 +265,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mTextView.setText("Demo succeed more:" + lstrCompany + "|"+lstrFactory+"|"+lstrPlant);
             }
 
-
+        arefFixCom.Close();
+        arefFixCom.DeleteObject();
+        arefFixCom = null;
     }
 
     protected void OnTestDemo()
     {
         TextView mTextView = (TextView) this.findViewById(R.id.test);
+
+        FixcommA arefFixCom = new FixcommA();
 
         Boolean lnRet = arefFixCom.Link(this.m_strIP, 17001);
 
@@ -298,6 +340,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             mTextView.setText("Demo false");
         }
+
+        arefFixCom.Close();
+        arefFixCom.DeleteObject();
+        arefFixCom = null;
     }
 
     int m_PushedCount = 0;
@@ -330,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (this.m_PushedCount>=5)
                 {
-                    this.OnTestSensor();
+                  //  this.OnTestSensor();
 
                     this.m_PushedCount = 0;
 
@@ -339,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
 
-                short m = (short)(last_x*10);
+                short m = (short)(speed*10);
                 last_x = x;
 
                 m_PushedCount++;
@@ -348,14 +394,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 loTemp.order(ByteOrder.LITTLE_ENDIAN);
 
-                loTemp.putShort((short)m);
+                loTemp.putShort(m);
 
-                this.m_oWaveBuffers.add(loTemp.get(0));
+                synchronized (this)
+                {
+                    this.m_oWaveBuffers.add(loTemp.get(0));
 
-                this.m_oWaveBuffers.add(loTemp.get(1));
+                    this.m_oWaveBuffers.add(loTemp.get(1));
+                }
 
                 last_y = y;
                 last_z = z;
+            }
+        }
+    }
+
+    class TimerTaskTest extends java.util.TimerTask
+    {
+        MainActivity m_pOuter= null;
+        public  TimerTaskTest(MainActivity arefOuter)
+        {
+            this.m_pOuter = arefOuter;
+        }
+        public void run()
+        {
+            try
+            {
+                this.m_pOuter.OnTestSensor();
+
+            }catch (Exception e)
+            {
+
             }
         }
     }
